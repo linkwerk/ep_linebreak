@@ -1,0 +1,4 @@
+/* insert linebreaks */
+.linebreak::after {
+    content: "\A ";
+}

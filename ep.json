@@ -1,0 +1,12 @@
+{
+  "parts": [
+    {
+      "name": "main",
+      "client_hooks": {
+        "aceKeyEvent": "ep_linebreak/static/hooks",
+        "aceAttribsToClasses": "ep_linebreak/static/hooks",
+        "aceEditorCSS": "ep_linebreak/static/hooks"
+      }
+    }
+  ]
+}
