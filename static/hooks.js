@@ -1,9 +1,13 @@
+// character stored in database as a placeholder
+//var LINEBREAK_PLACEHOLDER = '\u2028';
+var LINEBREAK_PLACEHOLDER = ' ';
+
 /**
  * map etherpad attribute 'linebreak' to 
  * a dom class 'linebreak' in the editor dom
  */
 exports.aceAttribsToClasses = function(hook_name, context){
-    if (context.key == 'linebreak') return ['linebreak', context.value];
+    if (context.key === 'linebreak') return ['linebreak', context.value];
 };
 
 exports.aceEditorCSS = function() {
@@ -35,7 +39,7 @@ var insertLinebreak = function(context) {
     var rep = context.rep;
     
     // insert linebreak unicode character 
-    context.editorInfo.ace_replaceRange(rep.selStart, rep.selEnd, '\u2028');
+    context.editorInfo.ace_replaceRange(rep.selStart, rep.selEnd, LINEBREAK_PLACEHOLDER);
 
     // add linebreak attribute
     context.documentAttributeManager.setAttributesOnRange(
