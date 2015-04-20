@@ -1,17 +1,4 @@
 /* make linebreaks visible */
 .linebreak {
-    background-color: #fee;
-}
-
-.linebreak::after {
-    /* \00b6 is a pilcrow (¶), 
-       \23ce is a return symbol (⏎)
-       \A a line break, 
-       \200b a zero-width whitespace, needed when displayed at the end of an "Etherpad-Line" */ 
-    content: "\23ce \A \200b ";
-    white-space: pre; /* white-space:pre is needed for Chrome */
-    
-    color: #888; /* color of the linebreak symbol */
-    background-color: #fee;
-    
+    color: #999;
 }

@@ -5,7 +5,9 @@
       "client_hooks": {
         "aceKeyEvent": "ep_linebreak/static/hooks",
         "aceAttribsToClasses": "ep_linebreak/static/hooks",
-        "aceEditorCSS": "ep_linebreak/static/hooks"
+        "aceEditorCSS": "ep_linebreak/static/hooks",
+        "aceCreateDomLine": "ep_linebreak/static/hooks",
+        "collectContentLineBreak": "ep_linebreak/static/hooks"
       }
     }
   ]
