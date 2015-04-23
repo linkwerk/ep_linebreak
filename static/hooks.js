@@ -1,6 +1,6 @@
 // character stored in database as a placeholder
 //var LINEBREAK_PLACEHOLDER = '\u2028';
-var LINEBREAK_PLACEHOLDER = '\u23ce'; // return symbols
+var LINEBREAK_PLACEHOLDER = '\u23ce'; // return symbol
 
 /**
  * map etherpad attribute 'linebreak' to
