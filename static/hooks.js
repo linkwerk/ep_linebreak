@@ -1,6 +1,8 @@
 // character stored in database as a placeholder
 //var LINEBREAK_PLACEHOLDER = '\u2028';
 var LINEBREAK_PLACEHOLDER = '\u23ce'; // return symbol
+var LENGTH_OF_PLACEHOLDER = LINEBREAK_PLACEHOLDER.length;
+
 
 /**
  * map etherpad attribute 'linebreak' to
@@ -87,3 +89,156 @@ var insertLinebreak = function(context) {
     );
 };
 
+
+
+/* ***************************************************************************
+ * BEGIN bugfix due to n.innerText usage in nodeText(). See below for details.
+ ***************************************************************************** */
+
+exports.aceEndLineAndCharForPoint = function(hook_name, context) {
+	return getLineAndCharForPoint(context);
+}
+
+exports.aceStartLineAndCharForPoint = function(hook_name, context) {
+	return getLineAndCharForPoint(context);
+}
+
+
+/*
+ * This function is a MODIFIED copy of
+ *  http://etherpad.org/doc/v1.5.6/#index_editorinfo_ace_getlineandcharforpoint
+ *  Trying to fix a bug, that causes different behaviour of FF and chrome
+ */
+function getLineAndCharForPoint(ctx)
+{
+	var point = ctx.point;
+	var rep = ctx.rep;
+
+	// http://etherpad.org/doc/v1.5.6/#index_editorinfo_ace_isblockelement_element
+	var isBlockElement = ctx.editorInfo.ace_isBlockElement;
+
+
+  // Turn DOM node selection into [line,char] selection.
+  // This method has to work when the DOM is not pristine,
+  // assuming the point is not in a dirty node.
+  if (point.node == ctx.root)
+  {
+    if (point.index === 0)
+    {
+      return [0, 0];
+    }
+    else
+    {
+      var N = rep.lines.length();
+      var ln = rep.lines.atIndex(N - 1);
+      return [N - 1, ln.text.length];
+    }
+  }
+  else
+  {
+    var n = point.node;
+    var col = 0;
+
+    // if this part fails, it probably means the selection node
+    // was dirty, and we didn't see it when collecting dirty nodes.
+    if (n.nodeType == 3) // text node
+    {
+      col = point.index;
+    }
+    else if (point.index > 0)
+    {
+      col = nodeText(n).length;
+    }
+    var parNode, prevSib;
+    while ((parNode = n.parentNode) != ctx.root)
+    {
+      if ((prevSib = n.previousSibling))
+      {
+        n = prevSib;
+
+        /*
+         * The following if-clause prevents Chrome from
+         * crash with the *original* nodeText() function
+         * when counting the length of the linebreak
+         * markup.
+         */
+ 		if (n.nodeType === Node.ELEMENT_NODE
+ 				&& n.hasAttribute("class")
+ 				&& n.classList.contains("linebreak")) {
+ 			col += LENGTH_OF_PLACEHOLDER;
+ 			/* the linebreak element counts as
+ 			 * LENGTH_OF_PLACEHOLDER number of characters,
+ 			 * no matter how much additional markup we insert
+ 			 */
+
+ 		} else {
+ 			col += nodeText(n).length;
+ 		}
+      }
+      else
+      {
+        n = parNode;
+      }
+    }
+    if (n.id === "") console.debug("BAD");
+    if (n.firstChild && isBlockElement(n.firstChild))
+    {
+      col += 1; // lineMarker
+    }
+    var lineEntry = rep.lines.atKey(n.id);
+    var lineNum = rep.lines.indexOfEntry(lineEntry);
+    return [lineNum, col];
+  }
+}
+
+
+
+/*
+ * modified copy from https://github.com/ether/etherpad-lite/blob/6a027d88a90c7ac70ad23af4786cd79a3b47c8b5/src/static/js/ace2_inner.js#L1983
+ * BE AWARE that FF and chrome return different result for some elements,
+ * if n.innerText is the first in row.
+ * TODO: Test with MSIE (which version to support?)
+ */
+function nodeText(n)
+{
+  return n.textContent || n.nodeValue || n.innerText || '';
+}
+
+/*
+ * Bug description:
+ *
+ * Given this markup: <span id="test">x<br/></span>
+ *
+ * Compare the following expressions in FF (37.0.1) and Chrome (42.0.2311.90):
+ *
+ *
+ * document.getElementById("test").innerText
+ *
+ * FF: fails
+ * Chrome: "x\n"
+ *
+ *
+ * document.getElementById("test").innerText.length
+ *
+ * FF: fails
+ * Chrome: 2
+ *
+ *
+ * document.getElementById("test").textContent
+ *
+ * FF: "x"
+ * Chrome: "x"
+ *
+ * document.getElementById("test").textContent.length
+ *
+ * FF: 1
+ * Chrome: 1
+ *
+ *
+ *
+ * A solution for our bug could be to remove .innerText from nodeText().
+ * I decided to check if node is our linebreak node and define the
+ * character count.
+ * .innerText has been moved to the end of nodeText().
+ *
+ */
