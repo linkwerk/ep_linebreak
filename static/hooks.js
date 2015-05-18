@@ -1,7 +1,6 @@
 // character stored in database as a placeholder
-//var LINEBREAK_PLACEHOLDER = '\u2028';
+//var LINEBREAK_PLACEHOLDER = '\u2028'; // line seperator
 var LINEBREAK_PLACEHOLDER = '\u23ce'; // return symbol
-var LENGTH_OF_PLACEHOLDER = LINEBREAK_PLACEHOLDER.length;
 
 
 /**
@@ -36,12 +35,6 @@ exports.aceKeyEvent = function(hook_name, context) {
 
 
 /*
-exports.acePostWriteDomLineHTML = function(name, context) {
-}
-*/
-
-
-/*
  * Insert br element for content with attribute "linebreak"
  * http://etherpad.org/doc/v1.5.6/#index_acecreatedomline
  *
@@ -49,18 +42,18 @@ exports.acePostWriteDomLineHTML = function(name, context) {
  * https://github.com/fourplusone/etherpad-plugins/blob/f6561a2b2323f8df2d3ef79154527f1ec5adfa56/ep_linkify/static/js/index.js#L50
  */
 exports.aceCreateDomLine = function(name, context){
-	  var cls = context.cls;
+    var cls = context.cls;
 
-	  if (cls.indexOf('linebreak') >= 0) {
-	    var modifier = {
-	      extraOpenTags: '',
-	      extraCloseTags: '<br/>',
-	      cls: cls
-	    }
-	    return [modifier];
-	  }
-	  return;
-}
+    if (cls.indexOf('linebreak') >= 0) {
+      var modifier = {
+        extraOpenTags: '',
+        extraCloseTags: '<br/>',
+        cls: cls
+      };
+      return [modifier];
+    }
+    return;
+};
 
 /*
  * Prevent the br element from introducing a new magic domline
@@ -68,7 +61,7 @@ exports.aceCreateDomLine = function(name, context){
  *
  */
 exports.collectContentLineBreak = function (name, context) {
-	  return false;
+    return false;
 };
 
 var enterPressed = function (event) {
